@@ -18,7 +18,7 @@
         overflow-x: hidden;
       }
 
-      #menu, #tips {
+      #menu, #tips, #mapa {
         padding: 40px 20px;
       }
       #menu h1 {
@@ -78,6 +78,27 @@
         text-align: center;
       }
 
+      /* Mapa */
+      #mapa {
+        display: none;
+        max-width: 900px;
+        margin: auto;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+      }
+      #mapa h2 {
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      #mapa img {
+        max-width: 100%;
+        height: auto;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+      }
+
       /* Menu lateral (hamburger) */
       #sideMenu {
         height: 100%;
@@ -122,11 +143,18 @@
       /* Responsividade */
       @media (max-width: 768px) {
         #menu h1 {
-          font-size: 1.5em;
+          font-size: 1.4em;
         }
         button {
-          width: 100%;
+          width: 90%;
           max-width: 300px;
+        }
+        #unity-canvas {
+          width: 100% !important;
+          height: auto !important;
+        }
+        #sideMenu {
+          width: 100% !important; /* ocupa toda a tela no celular */
         }
       }
     </style>
@@ -140,6 +168,7 @@
     <div id="sideMenu">
       <button onclick="startGame()">▶ Jogar</button>
       <button onclick="showTips()">ℹ Dicas</button>
+      <button onclick="showMapa()">🗺 Mapa do Campus</button>
       <button onclick="exitGame()">❌ Sair</button>
       <button onclick="closeMenu()">⬅ Fechar</button>
     </div>
@@ -165,6 +194,14 @@
       <button onclick="voltarMenu()">⬅ Voltar</button>
     </div>
 
+    <!-- TELA DO MAPA -->
+    <div id="mapa">
+      <h2>Mapa do Campus Central da UFRN</h2>
+      <img src="assets/images/mapa-ufrn.jpg" alt="Mapa do Campus UFRN">
+      <br><br>
+      <button onclick="voltarMenuMapa()">⬅ Voltar</button>
+    </div>
+
     <!-- UNITY GAME -->
     <div id="unity-container" class="unity-desktop">
       <canvas id="unity-canvas" tabindex="-1"></canvas>
@@ -179,6 +216,7 @@
       const unityContainer = document.querySelector("#unity-container");
       const menu = document.querySelector("#menu");
       const tips = document.querySelector("#tips");
+      const mapa = document.querySelector("#mapa");
       const sideMenu = document.getElementById("sideMenu");
 
       // Abrir / fechar menu lateral
@@ -192,6 +230,7 @@
       function startGame() {
         menu.style.display = "none";
         tips.style.display = "none";
+        mapa.style.display = "none";
         unityContainer.style.display = "flex";
         closeMenu();
 
@@ -240,12 +279,26 @@
       function showTips() {
         menu.style.display = "none";
         unityContainer.style.display = "none";
+        mapa.style.display = "none";
         tips.style.display = "block";
         closeMenu();
       }
 
       function voltarMenu() {
         tips.style.display = "none";
+        menu.style.display = "block";
+      }
+
+      function showMapa() {
+        menu.style.display = "none";
+        unityContainer.style.display = "none";
+        tips.style.display = "none";
+        mapa.style.display = "block";
+        closeMenu();
+      }
+
+      function voltarMenuMapa() {
+        mapa.style.display = "none";
         menu.style.display = "block";
       }
 
