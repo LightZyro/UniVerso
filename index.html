@@ -1,127 +1,259 @@
 <!DOCTYPE html>
-<html lang="en-us">
+<html lang="pt-br">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Unity Web Player | Campus</title>
+    <title>UniVerso | Campus</title>
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f0f0f0;
+        margin: 0;
+        padding: 0;
+        text-align: center;
+        overflow-x: hidden;
+      }
+
+      #menu, #tips {
+        padding: 40px 20px;
+      }
+      #menu h1 {
+        font-size: 2em;
+        margin-bottom: 20px;
+      }
+      button {
+        margin: 10px;
+        padding: 12px 20px;
+        font-size: 1em;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        background: #0056b3;
+        color: white;
+        transition: background 0.3s;
+      }
+      button:hover {
+        background: #003d80;
+      }
+
+      /* Container do Unity */
+      #unity-container {
+        display: none;
+        margin: auto;
+        background: #000;
+        width: 100%;
+        height: 100vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
+      #unity-canvas {
+        width: 100%;
+        height: 100%;
+        max-width: 960px;
+        max-height: 600px;
+      }
+      #unity-footer {
+        margin-top: 10px;
+      }
+
+      /* Dicas */
+      #tips {
+        display: none;
+        text-align: left;
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0px 0px 10px rgba(0,0,0,0.2);
+      }
+      #tips h2 {
+        text-align: center;
+      }
+
+      /* Menu lateral (hamburger) */
+      #sideMenu {
+        height: 100%;
+        width: 0;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        background-color: #111;
+        overflow-x: hidden;
+        transition: 0.3s;
+        padding-top: 60px;
+      }
+      #sideMenu button {
+        padding: 12px 20px;
+        font-size: 1.2em;
+        color: white;
+        display: block;
+        border: none;
+        background: none;
+        text-align: left;
+        width: 100%;
+        cursor: pointer;
+      }
+      #sideMenu button:hover {
+        background: #333;
+      }
+      #menuBtn {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        font-size: 24px;
+        background: #0056b3;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 12px;
+        cursor: pointer;
+        z-index: 1100;
+      }
+
+      /* Responsividade */
+      @media (max-width: 768px) {
+        #menu h1 {
+          font-size: 1.5em;
+        }
+        button {
+          width: 100%;
+          max-width: 300px;
+        }
+      }
+    </style>
   </head>
   <body>
+
+    <!-- BOTÃO HAMBURGER -->
+    <button id="menuBtn">☰</button>
+
+    <!-- MENU LATERAL -->
+    <div id="sideMenu">
+      <button onclick="startGame()">▶ Jogar</button>
+      <button onclick="showTips()">ℹ Dicas</button>
+      <button onclick="exitGame()">❌ Sair</button>
+      <button onclick="closeMenu()">⬅ Fechar</button>
+    </div>
+
+    <!-- MENU INICIAL -->
+    <div id="menu">
+      <h1>🎓 Bem-vindo ao UniVerso</h1>
+      <p>Descubra o campus, aprenda sobre a universidade e explore o curso de Administração.</p>
+      <button id="play-btn">▶ Jogar</button>
+      <button id="tips-btn">ℹ Dicas</button>
+    </div>
+
+    <!-- TELA DE DICAS -->
+    <div id="tips">
+      <h2>Dicas sobre a Universidade e o Curso</h2>
+      <ul>
+        <li>📚 Aproveite a biblioteca e os laboratórios para reforçar seus estudos.</li>
+        <li>🤝 Participe de projetos de extensão e pesquisa para enriquecer sua formação.</li>
+        <li>🎤 Compareça às semanas acadêmicas e eventos para networking.</li>
+        <li>💡 Converse com veteranos e professores: eles podem dar dicas valiosas.</li>
+        <li>💼 Busque estágios cedo: a experiência prática faz toda a diferença.</li>
+      </ul>
+      <button onclick="voltarMenu()">⬅ Voltar</button>
+    </div>
+
+    <!-- UNITY GAME -->
     <div id="unity-container" class="unity-desktop">
-      <canvas id="unity-canvas" width=960 height=600 tabindex="-1"></canvas>
-      <div id="unity-loading-bar">
-        <div id="unity-logo"></div>
-        <div id="unity-progress-bar-empty">
-          <div id="unity-progress-bar-full"></div>
-        </div>
-      </div>
-      <div id="unity-warning"> </div>
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
       <div id="unity-footer">
-        <div id="unity-logo-title-footer"></div>
-        <div id="unity-fullscreen-button"></div>
-        <div id="unity-build-title">Campus</div>
+        <button id="fullscreen-btn">🔳 Tela Cheia</button>
       </div>
     </div>
+
     <script>
-      var canvas = document.querySelector("#unity-canvas");
+      let unityInstance = null;
+      const canvas = document.querySelector("#unity-canvas");
+      const unityContainer = document.querySelector("#unity-container");
+      const menu = document.querySelector("#menu");
+      const tips = document.querySelector("#tips");
+      const sideMenu = document.getElementById("sideMenu");
 
-      // Shows a temporary message banner/ribbon for a few seconds, or
-      // a permanent error message on top of the canvas if type=='error'.
-      // If type=='warning', a yellow highlight color is used.
-      // Modify or remove this function to customize the visually presented
-      // way that non-critical warnings and error messages are presented to the
-      // user.
-      function unityShowBanner(msg, type) {
-        var warningBanner = document.querySelector("#unity-warning");
-        function updateBannerVisibility() {
-          warningBanner.style.display = warningBanner.children.length ? 'block' : 'none';
-        }
-        var div = document.createElement('div');
-        div.innerHTML = msg;
-        warningBanner.appendChild(div);
-        if (type == 'error') div.style = 'background: red; padding: 10px;';
-        else {
-          if (type == 'warning') div.style = 'background: yellow; padding: 10px;';
-          setTimeout(function() {
-            warningBanner.removeChild(div);
-            updateBannerVisibility();
-          }, 5000);
-        }
-        updateBannerVisibility();
-      }
-
-      var buildUrl = "Build";
-      var loaderUrl = buildUrl + "/2.loader.js";
-      var config = {
-        arguments: [],
-        dataUrl: buildUrl + "/2.data",
-        frameworkUrl: buildUrl + "/2.framework.js",
-        codeUrl: buildUrl + "/2.wasm",
-        streamingAssetsUrl: "StreamingAssets",
-        companyName: "DefaultCompany",
-        productName: "Campus",
-        productVersion: "0.1.0",
-        showBanner: unityShowBanner,
+      // Abrir / fechar menu lateral
+      document.getElementById("menuBtn").onclick = () => {
+        sideMenu.style.width = sideMenu.style.width === "250px" ? "0" : "250px";
       };
-
-      // By default, Unity keeps WebGL canvas render target size matched with
-      // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-      // Set this to false if you want to decouple this synchronization from
-      // happening inside the engine, and you would instead like to size up
-      // the canvas DOM size and WebGL render target sizes yourself.
-      // config.matchWebGLToCanvasSize = false;
-
-      // If you would like all file writes inside Unity Application.persistentDataPath
-      // directory to automatically persist so that the contents are remembered when
-      // the user revisits the site the next time, uncomment the following line:
-      // config.autoSyncPersistentDataPath = true;
-      // This autosyncing is currently not the default behavior to avoid regressing
-      // existing user projects that might rely on the earlier manual
-      // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-      // expected to change.
-
-      if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-        // Mobile device style: fill the whole browser client area with the game canvas:
-
-        var meta = document.createElement('meta');
-        meta.name = 'viewport';
-        meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
-        document.getElementsByTagName('head')[0].appendChild(meta);
-        document.querySelector("#unity-container").className = "unity-mobile";
-        canvas.className = "unity-mobile";
-
-        // To lower canvas resolution on mobile devices to gain some
-        // performance, uncomment the following line:
-        // config.devicePixelRatio = 1;
-
-
-      } else {
-        // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-        canvas.style.width = "960px";
-        canvas.style.height = "600px";
+      function closeMenu() {
+        sideMenu.style.width = "0";
       }
 
-      document.querySelector("#unity-loading-bar").style.display = "block";
+      function startGame() {
+        menu.style.display = "none";
+        tips.style.display = "none";
+        unityContainer.style.display = "flex";
+        closeMenu();
 
-      var script = document.createElement("script");
-      script.src = loaderUrl;
-      script.onload = () => {
-        createUnityInstance(canvas, config, (progress) => {
-          document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
-              }).then((unityInstance) => {
-                document.querySelector("#unity-loading-bar").style.display = "none";
-                document.querySelector("#unity-fullscreen-button").onclick = () => {
-                  unityInstance.SetFullscreen(1);
-                };
+        if (unityInstance) return; // já carregado
 
-              }).catch((message) => {
-                alert(message);
-              });
-            };
+        var buildUrl = "Build";
+        var loaderUrl = buildUrl + "/2.loader.js";
+        var config = {
+          dataUrl: buildUrl + "/2.data",
+          frameworkUrl: buildUrl + "/2.framework.js",
+          codeUrl: buildUrl + "/2.wasm",
+          streamingAssetsUrl: "StreamingAssets",
+          companyName: "DefaultCompany",
+          productName: "Campus",
+          productVersion: "0.1.0"
+        };
 
-      document.body.appendChild(script);
+        var script = document.createElement("script");
+        script.src = loaderUrl;
+        script.onload = () => {
+          createUnityInstance(canvas, config, (progress) => {
+            console.log("Carregando: " + (progress * 100) + "%");
+          }).then((instance) => {
+            unityInstance = instance;
+          }).catch((message) => {
+            alert(message);
+          });
+        };
+        document.body.appendChild(script);
+      }
 
+      function exitGame() {
+        if (unityInstance) {
+          unityInstance.Quit().then(() => {
+            unityInstance = null;
+            unityContainer.style.display = "none";
+            menu.style.display = "block";
+          });
+        } else {
+          unityContainer.style.display = "none";
+          menu.style.display = "block";
+        }
+        closeMenu();
+      }
+
+      function showTips() {
+        menu.style.display = "none";
+        unityContainer.style.display = "none";
+        tips.style.display = "block";
+        closeMenu();
+      }
+
+      function voltarMenu() {
+        tips.style.display = "none";
+        menu.style.display = "block";
+      }
+
+      document.getElementById("play-btn").onclick = startGame;
+      document.getElementById("tips-btn").onclick = showTips;
+      document.getElementById("fullscreen-btn").onclick = () => {
+        if (unityInstance) unityInstance.SetFullscreen(1);
+      };
     </script>
   </body>
 </html>
